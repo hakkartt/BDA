@@ -1,0 +1,24 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1601882006888.000,
+    "dirty" : true,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "0",
+    "id" : "BE8AAAD5",
+    "lastKnownWriteTime" : 1601888155,
+    "last_content_update" : 1601903335564,
+    "path" : "~/Documents/BDA/assignment5.Rmd",
+    "project_path" : "assignment5.Rmd",
+    "properties" : {
+        "cursorPosition" : "83,4",
+        "last_setup_crc32" : "14AFECA6bb338d19",
+        "scrollLine" : "66",
+        "tempName" : "Untitled1"
+    },
+    "relative_order" : 5,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_markdown"
+}

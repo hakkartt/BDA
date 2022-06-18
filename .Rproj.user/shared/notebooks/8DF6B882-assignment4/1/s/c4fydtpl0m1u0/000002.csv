@@ -1,0 +1,6 @@
+"0","normalized_importance_weights <- function(alpha, beta){"
+"0"," log_ratios <- bioassaylp(alpha, beta, bioassay$x, bioassay$y, bioassay$n)"
+"0"," normalized <- exp(log_ratios)/(sum(exp(log_ratios)))"
+"0"," return(normalized)"
+"0"," "
+"0","}"

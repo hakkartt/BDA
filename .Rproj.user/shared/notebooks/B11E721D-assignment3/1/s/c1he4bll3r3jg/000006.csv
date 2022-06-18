@@ -1,0 +1,2 @@
+"0","# HISTOGRAM"
+"0","hist(mu_d, main=""Difference between the mean estimates"", xlab=""mu_d"", xlim=c(-4,2), col=""black"", freq=FALSE)"

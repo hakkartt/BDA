@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<!-- saved from url=(0056)https://avehtari.github.io/BDA_course_Aalto/project.html -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+
+<meta name="generator" content="pandoc">
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE">
+
+
+
+
+<title>Bayesian Data Analysis course - Project work</title>
+
+<script src="./Bayesian Data Analysis course - Project work_files/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="./Bayesian Data Analysis course - Project work_files/readable.min.css" rel="stylesheet">
+<script src="./Bayesian Data Analysis course - Project work_files/bootstrap.min.js"></script>
+<script src="./Bayesian Data Analysis course - Project work_files/html5shiv.min.js"></script>
+<script src="./Bayesian Data Analysis course - Project work_files/respond.min.js"></script>
+<script src="./Bayesian Data Analysis course - Project work_files/jquery-ui.min.js"></script>
+<link href="./Bayesian Data Analysis course - Project work_files/jquery.tocify.css" rel="stylesheet">
+<script src="./Bayesian Data Analysis course - Project work_files/jquery.tocify.js"></script>
+<script src="./Bayesian Data Analysis course - Project work_files/tabsets.js"></script>
+<link href="./Bayesian Data Analysis course - Project work_files/default.css" rel="stylesheet">
+<script src="./Bayesian Data Analysis course - Project work_files/highlight.js"></script>
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+
+
+<style type="text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 66px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 71px;
+  margin-top: -71px;
+}
+.section h2 {
+  padding-top: 71px;
+  margin-top: -71px;
+}
+.section h3 {
+  padding-top: 71px;
+  margin-top: -71px;
+}
+.section h4 {
+  padding-top: 71px;
+  margin-top: -71px;
+}
+.section h5 {
+  padding-top: 71px;
+  margin-top: -71px;
+}
+.section h6 {
+  padding-top: 71px;
+  margin-top: -71px;
+}
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #ffffff;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+
+
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
+
+<script type="text/javascript" src="./Bayesian Data Analysis course - Project work_files/MathJax.js"></script><style type="text/css">.MathJax_Hover_Frame {border-radius: .25em; -webkit-border-radius: .25em; -moz-border-radius: .25em; -khtml-border-radius: .25em; box-shadow: 0px 0px 15px #83A; -webkit-box-shadow: 0px 0px 15px #83A; -moz-box-shadow: 0px 0px 15px #83A; -khtml-box-shadow: 0px 0px 15px #83A; border: 1px solid #A6D ! important; display: inline-block; position: absolute}
+.MathJax_Menu_Button .MathJax_Hover_Arrow {position: absolute; cursor: pointer; display: inline-block; border: 2px solid #AAA; border-radius: 4px; -webkit-border-radius: 4px; -moz-border-radius: 4px; -khtml-border-radius: 4px; font-family: 'Courier New',Courier; font-size: 9px; color: #F0F0F0}
+.MathJax_Menu_Button .MathJax_Hover_Arrow span {display: block; background-color: #AAA; border: 1px solid; border-radius: 3px; line-height: 0; padding: 4px}
+.MathJax_Hover_Arrow:hover {color: white!important; border: 2px solid #CCC!important}
+.MathJax_Hover_Arrow:hover span {background-color: #CCC!important}
+</style><style type="text/css">#MathJax_About {position: fixed; left: 50%; width: auto; text-align: center; border: 3px outset; padding: 1em 2em; background-color: #DDDDDD; color: black; cursor: default; font-family: message-box; font-size: 120%; font-style: normal; text-indent: 0; text-transform: none; line-height: normal; letter-spacing: normal; word-spacing: normal; word-wrap: normal; white-space: nowrap; float: none; z-index: 201; border-radius: 15px; -webkit-border-radius: 15px; -moz-border-radius: 15px; -khtml-border-radius: 15px; box-shadow: 0px 10px 20px #808080; -webkit-box-shadow: 0px 10px 20px #808080; -moz-box-shadow: 0px 10px 20px #808080; -khtml-box-shadow: 0px 10px 20px #808080; filter: progid:DXImageTransform.Microsoft.dropshadow(OffX=2, OffY=2, Color='gray', Positive='true')}
+#MathJax_About.MathJax_MousePost {outline: none}
+.MathJax_Menu {position: absolute; background-color: white; color: black; width: auto; padding: 5px 0px; border: 1px solid #CCCCCC; margin: 0; cursor: default; font: menu; text-align: left; text-indent: 0; text-transform: none; line-height: normal; letter-spacing: normal; word-spacing: normal; word-wrap: normal; white-space: nowrap; float: none; z-index: 201; border-radius: 5px; -webkit-border-radius: 5px; -moz-border-radius: 5px; -khtml-border-radius: 5px; box-shadow: 0px 10px 20px #808080; -webkit-box-shadow: 0px 10px 20px #808080; -moz-box-shadow: 0px 10px 20px #808080; -khtml-box-shadow: 0px 10px 20px #808080; filter: progid:DXImageTransform.Microsoft.dropshadow(OffX=2, OffY=2, Color='gray', Positive='true')}
+.MathJax_MenuItem {padding: 1px 2em; background: transparent}
+.MathJax_MenuArrow {position: absolute; right: .5em; padding-top: .25em; color: #666666; font-size: .75em}
+.MathJax_MenuActive .MathJax_MenuArrow {color: white}
+.MathJax_MenuArrow.RTL {left: .5em; right: auto}
+.MathJax_MenuCheck {position: absolute; left: .7em}
+.MathJax_MenuCheck.RTL {right: .7em; left: auto}
+.MathJax_MenuRadioCheck {position: absolute; left: .7em}
+.MathJax_MenuRadioCheck.RTL {right: .7em; left: auto}
+.MathJax_MenuLabel {padding: 1px 2em 3px 1.33em; font-style: italic}
+.MathJax_MenuRule {border-top: 1px solid #DDDDDD; margin: 4px 3px}
+.MathJax_MenuDisabled {color: GrayText}
+.MathJax_MenuActive {background-color: #606872; color: white}
+.MathJax_MenuDisabled:focus, .MathJax_MenuLabel:focus {background-color: #E8E8E8}
+.MathJax_ContextMenu:focus {outline: none}
+.MathJax_ContextMenu .MathJax_MenuItem:focus {outline: none}
+#MathJax_AboutClose {top: .2em; right: .2em}
+.MathJax_Menu .MathJax_MenuClose {top: -10px; left: -10px}
+.MathJax_MenuClose {position: absolute; cursor: pointer; display: inline-block; border: 2px solid #AAA; border-radius: 18px; -webkit-border-radius: 18px; -moz-border-radius: 18px; -khtml-border-radius: 18px; font-family: 'Courier New',Courier; font-size: 24px; color: #F0F0F0}
+.MathJax_MenuClose span {display: block; background-color: #AAA; border: 1.5px solid; border-radius: 18px; -webkit-border-radius: 18px; -moz-border-radius: 18px; -khtml-border-radius: 18px; line-height: 0; padding: 8px 0 6px}
+.MathJax_MenuClose:hover {color: white!important; border: 2px solid #CCC!important}
+.MathJax_MenuClose:hover span {background-color: #CCC!important}
+.MathJax_MenuClose:hover:focus {outline: none}
+</style><style type="text/css">.MathJax_Preview .MJXf-math {color: inherit!important}
+</style><style type="text/css">.MJX_Assistive_MathML {position: absolute!important; top: 0; left: 0; clip: rect(1px, 1px, 1px, 1px); padding: 1px 0 0 0!important; border: 0!important; height: 1px!important; width: 1px!important; overflow: hidden!important; display: block!important; -webkit-touch-callout: none; -webkit-user-select: none; -khtml-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none}
+.MJX_Assistive_MathML.MJX_Assistive_MathML_Block {width: 100%!important}
+</style><style type="text/css">#MathJax_Zoom {position: absolute; background-color: #F0F0F0; overflow: auto; display: block; z-index: 301; padding: .5em; border: 1px solid black; margin: 0; font-weight: normal; font-style: normal; text-align: left; text-indent: 0; text-transform: none; line-height: normal; letter-spacing: normal; word-spacing: normal; word-wrap: normal; white-space: nowrap; float: none; -webkit-box-sizing: content-box; -moz-box-sizing: content-box; box-sizing: content-box; box-shadow: 5px 5px 15px #AAAAAA; -webkit-box-shadow: 5px 5px 15px #AAAAAA; -moz-box-shadow: 5px 5px 15px #AAAAAA; -khtml-box-shadow: 5px 5px 15px #AAAAAA; filter: progid:DXImageTransform.Microsoft.dropshadow(OffX=2, OffY=2, Color='gray', Positive='true')}
+#MathJax_ZoomOverlay {position: absolute; left: 0; top: 0; z-index: 300; display: inline-block; width: 100%; height: 100%; border: 0; padding: 0; margin: 0; background-color: white; opacity: 0; filter: alpha(opacity=0)}
+#MathJax_ZoomFrame {position: relative; display: inline-block; height: 0; width: 0}
+#MathJax_ZoomEventTrap {position: absolute; left: 0; top: 0; z-index: 302; display: inline-block; border: 0; padding: 0; margin: 0; background-color: white; opacity: 0; filter: alpha(opacity=0)}
+</style><style type="text/css">.MathJax_Preview {color: #888}
+#MathJax_Message {position: fixed; left: 1em; bottom: 1.5em; background-color: #E6E6E6; border: 1px solid #959595; margin: 0px; padding: 2px 8px; z-index: 102; color: black; font-size: 80%; width: auto; white-space: nowrap}
+#MathJax_MSIE_Frame {position: absolute; top: 0; left: 0; width: 0px; z-index: 101; border: 0px; margin: 0px; padding: 0px}
+.MathJax_Error {color: #CC0000; font-style: italic}
+</style><style type="text/css">.MJXp-script {font-size: .8em}
+.MJXp-right {-webkit-transform-origin: right; -moz-transform-origin: right; -ms-transform-origin: right; -o-transform-origin: right; transform-origin: right}
+.MJXp-bold {font-weight: bold}
+.MJXp-italic {font-style: italic}
+.MJXp-scr {font-family: MathJax_Script,'Times New Roman',Times,STIXGeneral,serif}
+.MJXp-frak {font-family: MathJax_Fraktur,'Times New Roman',Times,STIXGeneral,serif}
+.MJXp-sf {font-family: MathJax_SansSerif,'Times New Roman',Times,STIXGeneral,serif}
+.MJXp-cal {font-family: MathJax_Caligraphic,'Times New Roman',Times,STIXGeneral,serif}
+.MJXp-mono {font-family: MathJax_Typewriter,'Times New Roman',Times,STIXGeneral,serif}
+.MJXp-largeop {font-size: 150%}
+.MJXp-largeop.MJXp-int {vertical-align: -.2em}
+.MJXp-math {display: inline-block; line-height: 1.2; text-indent: 0; font-family: 'Times New Roman',Times,STIXGeneral,serif; white-space: nowrap; border-collapse: collapse}
+.MJXp-display {display: block; text-align: center; margin: 1em 0}
+.MJXp-math span {display: inline-block}
+.MJXp-box {display: block!important; text-align: center}
+.MJXp-box:after {content: " "}
+.MJXp-rule {display: block!important; margin-top: .1em}
+.MJXp-char {display: block!important}
+.MJXp-mo {margin: 0 .15em}
+.MJXp-mfrac {margin: 0 .125em; vertical-align: .25em}
+.MJXp-denom {display: inline-table!important; width: 100%}
+.MJXp-denom > * {display: table-row!important}
+.MJXp-surd {vertical-align: top}
+.MJXp-surd > * {display: block!important}
+.MJXp-script-box > *  {display: table!important; height: 50%}
+.MJXp-script-box > * > * {display: table-cell!important; vertical-align: top}
+.MJXp-script-box > *:last-child > * {vertical-align: bottom}
+.MJXp-script-box > * > * > * {display: block!important}
+.MJXp-mphantom {visibility: hidden}
+.MJXp-munderover {display: inline-table!important}
+.MJXp-over {display: inline-block!important; text-align: center}
+.MJXp-over > * {display: block!important}
+.MJXp-munderover > * {display: table-row!important}
+.MJXp-mtable {vertical-align: .25em; margin: 0 .125em}
+.MJXp-mtable > * {display: inline-table!important; vertical-align: middle}
+.MJXp-mtr {display: table-row!important}
+.MJXp-mtd {display: table-cell!important; text-align: center; padding: .5em 0 0 .5em}
+.MJXp-mtr > .MJXp-mtd:first-child {padding-left: 0}
+.MJXp-mtr:first-child > .MJXp-mtd {padding-top: 0}
+.MJXp-mlabeledtr {display: table-row!important}
+.MJXp-mlabeledtr > .MJXp-mtd:first-child {padding-left: 0}
+.MJXp-mlabeledtr:first-child > .MJXp-mtd {padding-top: 0}
+.MJXp-merror {background-color: #FFFF88; color: #CC0000; border: 1px solid #CC0000; padding: 1px 3px; font-style: normal; font-size: 90%}
+.MJXp-scale0 {-webkit-transform: scaleX(.0); -moz-transform: scaleX(.0); -ms-transform: scaleX(.0); -o-transform: scaleX(.0); transform: scaleX(.0)}
+.MJXp-scale1 {-webkit-transform: scaleX(.1); -moz-transform: scaleX(.1); -ms-transform: scaleX(.1); -o-transform: scaleX(.1); transform: scaleX(.1)}
+.MJXp-scale2 {-webkit-transform: scaleX(.2); -moz-transform: scaleX(.2); -ms-transform: scaleX(.2); -o-transform: scaleX(.2); transform: scaleX(.2)}
+.MJXp-scale3 {-webkit-transform: scaleX(.3); -moz-transform: scaleX(.3); -ms-transform: scaleX(.3); -o-transform: scaleX(.3); transform: scaleX(.3)}
+.MJXp-scale4 {-webkit-transform: scaleX(.4); -moz-transform: scaleX(.4); -ms-transform: scaleX(.4); -o-transform: scaleX(.4); transform: scaleX(.4)}
+.MJXp-scale5 {-webkit-transform: scaleX(.5); -moz-transform: scaleX(.5); -ms-transform: scaleX(.5); -o-transform: scaleX(.5); transform: scaleX(.5)}
+.MJXp-scale6 {-webkit-transform: scaleX(.6); -moz-transform: scaleX(.6); -ms-transform: scaleX(.6); -o-transform: scaleX(.6); transform: scaleX(.6)}
+.MJXp-scale7 {-webkit-transform: scaleX(.7); -moz-transform: scaleX(.7); -ms-transform: scaleX(.7); -o-transform: scaleX(.7); transform: scaleX(.7)}
+.MJXp-scale8 {-webkit-transform: scaleX(.8); -moz-transform: scaleX(.8); -ms-transform: scaleX(.8); -o-transform: scaleX(.8); transform: scaleX(.8)}
+.MJXp-scale9 {-webkit-transform: scaleX(.9); -moz-transform: scaleX(.9); -ms-transform: scaleX(.9); -o-transform: scaleX(.9); transform: scaleX(.9)}
+.MathJax_PHTML .noError {vertical-align: ; font-size: 90%; text-align: left; color: black; padding: 1px 3px; border: 1px solid}
+</style><style type="text/css">.MathJax_Display {text-align: center; margin: 1em 0em; position: relative; display: block!important; text-indent: 0; max-width: none; max-height: none; min-width: 0; min-height: 0; width: 100%}
+.MathJax .merror {background-color: #FFFF88; color: #CC0000; border: 1px solid #CC0000; padding: 1px 3px; font-style: normal; font-size: 90%}
+.MathJax .MJX-monospace {font-family: monospace}
+.MathJax .MJX-sans-serif {font-family: sans-serif}
+#MathJax_Tooltip {background-color: InfoBackground; color: InfoText; border: 1px solid black; box-shadow: 2px 2px 5px #AAAAAA; -webkit-box-shadow: 2px 2px 5px #AAAAAA; -moz-box-shadow: 2px 2px 5px #AAAAAA; -khtml-box-shadow: 2px 2px 5px #AAAAAA; filter: progid:DXImageTransform.Microsoft.dropshadow(OffX=2, OffY=2, Color='gray', Positive='true'); padding: 3px 4px; z-index: 401; position: absolute; left: 0; top: 0; width: auto; height: auto; display: none}
+.MathJax {display: inline; font-style: normal; font-weight: normal; line-height: normal; font-size: 100%; font-size-adjust: none; text-indent: 0; text-align: left; text-transform: none; letter-spacing: normal; word-spacing: normal; word-wrap: normal; white-space: nowrap; float: none; direction: ltr; max-width: none; max-height: none; min-width: 0; min-height: 0; border: 0; padding: 0; margin: 0}
+.MathJax:focus, body :focus .MathJax {display: inline-table}
+.MathJax.MathJax_FullWidth {text-align: center; display: table-cell!important; width: 10000em!important}
+.MathJax img, .MathJax nobr, .MathJax a {border: 0; padding: 0; margin: 0; max-width: none; max-height: none; min-width: 0; min-height: 0; vertical-align: 0; line-height: normal; text-decoration: none}
+img.MathJax_strut {border: 0!important; padding: 0!important; margin: 0!important; vertical-align: 0!important}
+.MathJax span {display: inline; position: static; border: 0; padding: 0; margin: 0; vertical-align: 0; line-height: normal; text-decoration: none}
+.MathJax nobr {white-space: nowrap!important}
+.MathJax img {display: inline!important; float: none!important}
+.MathJax * {transition: none; -webkit-transition: none; -moz-transition: none; -ms-transition: none; -o-transition: none}
+.MathJax_Processing {visibility: hidden; position: fixed; width: 0; height: 0; overflow: hidden}
+.MathJax_Processed {display: none!important}
+.MathJax_ExBox {display: block!important; overflow: hidden; width: 1px; height: 60ex; min-height: 0; max-height: none}
+.MathJax .MathJax_EmBox {display: block!important; overflow: hidden; width: 1px; height: 60em; min-height: 0; max-height: none}
+.MathJax_LineBox {display: table!important}
+.MathJax_LineBox span {display: table-cell!important; width: 10000em!important; min-width: 0; max-width: none; padding: 0; border: 0; margin: 0}
+.MathJax .MathJax_HitBox {cursor: text; background: white; opacity: 0; filter: alpha(opacity=0)}
+.MathJax .MathJax_HitBox * {filter: none; opacity: 1; background: transparent}
+#MathJax_Tooltip * {filter: none; opacity: 1; background: transparent}
+@font-face {font-family: MathJax_Main; src: url('https://mathjax.rstudio.com/latest/fonts/HTML-CSS/TeX/woff/MathJax_Main-Regular.woff?V=2.7.2') format('woff'), url('https://mathjax.rstudio.com/latest/fonts/HTML-CSS/TeX/otf/MathJax_Main-Regular.otf?V=2.7.2') format('opentype')}
+@font-face {font-family: MathJax_Main-bold; src: url('https://mathjax.rstudio.com/latest/fonts/HTML-CSS/TeX/woff/MathJax_Main-Bold.woff?V=2.7.2') format('woff'), url('https://mathjax.rstudio.com/latest/fonts/HTML-CSS/TeX/otf/MathJax_Main-Bold.otf?V=2.7.2') format('opentype')}
+@font-face {font-family: MathJax_Main-italic; src: url('https://mathjax.rstudio.com/latest/fonts/HTML-CSS/TeX/woff/MathJax_Main-Italic.woff?V=2.7.2') format('woff'), url('https://mathjax.rstudio.com/latest/fonts/HTML-CSS/TeX/otf/MathJax_Main-Italic.otf?V=2.7.2') format('opentype')}
+@font-face {font-family: MathJax_Math-italic; src: url('https://mathjax.rstudio.com/latest/fonts/HTML-CSS/TeX/woff/MathJax_Math-Italic.woff?V=2.7.2') format('woff'), url('https://mathjax.rstudio.com/latest/fonts/HTML-CSS/TeX/otf/MathJax_Math-Italic.otf?V=2.7.2') format('opentype')}
+@font-face {font-family: MathJax_Caligraphic; src: url('https://mathjax.rstudio.com/latest/fonts/HTML-CSS/TeX/woff/MathJax_Caligraphic-Regular.woff?V=2.7.2') format('woff'), url('https://mathjax.rstudio.com/latest/fonts/HTML-CSS/TeX/otf/MathJax_Caligraphic-Regular.otf?V=2.7.2') format('opentype')}
+@font-face {font-family: MathJax_Size1; src: url('https://mathjax.rstudio.com/latest/fonts/HTML-CSS/TeX/woff/MathJax_Size1-Regular.woff?V=2.7.2') format('woff'), url('https://mathjax.rstudio.com/latest/fonts/HTML-CSS/TeX/otf/MathJax_Size1-Regular.otf?V=2.7.2') format('opentype')}
+@font-face {font-family: MathJax_Size2; src: url('https://mathjax.rstudio.com/latest/fonts/HTML-CSS/TeX/woff/MathJax_Size2-Regular.woff?V=2.7.2') format('woff'), url('https://mathjax.rstudio.com/latest/fonts/HTML-CSS/TeX/otf/MathJax_Size2-Regular.otf?V=2.7.2') format('opentype')}
+@font-face {font-family: MathJax_Size3; src: url('https://mathjax.rstudio.com/latest/fonts/HTML-CSS/TeX/woff/MathJax_Size3-Regular.woff?V=2.7.2') format('woff'), url('https://mathjax.rstudio.com/latest/fonts/HTML-CSS/TeX/otf/MathJax_Size3-Regular.otf?V=2.7.2') format('opentype')}
+@font-face {font-family: MathJax_Size4; src: url('https://mathjax.rstudio.com/latest/fonts/HTML-CSS/TeX/woff/MathJax_Size4-Regular.woff?V=2.7.2') format('woff'), url('https://mathjax.rstudio.com/latest/fonts/HTML-CSS/TeX/otf/MathJax_Size4-Regular.otf?V=2.7.2') format('opentype')}
+.MathJax .noError {vertical-align: ; font-size: 90%; text-align: left; color: black; padding: 1px 3px; border: 1px solid}
+</style></head>
+
+<body><div style="visibility: hidden; overflow: hidden; position: absolute; top: 0px; height: 1px; width: auto; padding: 0px; border: 0px; margin: 0px; text-align: left; text-indent: 0px; text-transform: none; line-height: normal; letter-spacing: normal; word-spacing: normal;"><div id="MathJax_Hidden"></div></div><div id="MathJax_Message" style="display: none;"></div>
+
+
+<div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row-fluid">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+<ul id="tocify-header0" class="tocify-header list-group"><li class="tocify-item list-group-item active" data-unique="Project_work_details" style="cursor: pointer;">Project work details</li></ul><ul id="tocify-header1" class="tocify-header list-group"><li class="tocify-item list-group-item" data-unique="Project_schedule" style="cursor: pointer;">Project schedule</li></ul><ul id="tocify-header2" class="tocify-header list-group"><li class="tocify-item list-group-item" data-unique="Groups" style="cursor: pointer;">Groups</li></ul><ul id="tocify-header3" class="tocify-header list-group"><li class="tocify-item list-group-item" data-unique="TA_sessions" style="cursor: pointer;">TA sessions</li></ul><ul id="tocify-header4" class="tocify-header list-group"><li class="tocify-item list-group-item" data-unique="Evaluation" style="cursor: pointer;">Evaluation</li></ul><ul id="tocify-header5" class="tocify-header list-group"><li class="tocify-item list-group-item" data-unique="Project_report" style="cursor: pointer;">Project report</li></ul><ul id="tocify-header6" class="tocify-header list-group"><li class="tocify-item list-group-item" data-unique="Project_presentation" style="cursor: pointer;">Project presentation</li></ul><ul id="tocify-header7" class="tocify-header list-group"><li class="tocify-item list-group-item" data-unique="Data_sets" style="cursor: pointer;">Data sets</li></ul><ul id="tocify-header8" class="tocify-header list-group"><li class="tocify-item list-group-item" data-unique="Model_requirements" style="cursor: pointer;">Model requirements</li></ul><ul id="tocify-header9" class="tocify-header list-group"><li class="tocify-item list-group-item" data-unique="Some_examples" style="cursor: pointer;">Some examples</li></ul></div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="https://avehtari.github.io/BDA_course_Aalto/index.html">Bayesian Data Analysis course</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="https://avehtari.github.io/BDA_course_Aalto/index.html">Material</a>
+</li>
+<li>
+  <a href="https://avehtari.github.io/BDA_course_Aalto/Aalto2020.html">Aalto 2020</a>
+</li>
+<li>
+  <a href="https://avehtari.github.io/BDA_course_Aalto/demos.html">Demos</a>
+</li>
+<li>
+  <a href="https://avehtari.github.io/BDA_course_Aalto/assignments.html">Assignments</a>
+</li>
+<li class="active">
+  <a href="https://avehtari.github.io/BDA_course_Aalto/project.html">Project</a>
+</li>
+<li>
+  <a href="https://avehtari.github.io/BDA_course_Aalto/FAQ.html">FAQ</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">Bayesian Data Analysis course - Project work</h1>
+<h4 class="date">Page updated: 2020-11-03</h4>
+
+</div>
+
+
+<div id="project-work-details" class="section level2">
+<div name="Project_work_details" data-unique="Project_work_details"></div><h2>Project work details</h2>
+<p>Project work involves choosing a data set and performing a whole analysis according to all the parts of Bayesian workflow studied along the course.</p>
+<ul>
+<li>The project work is meant to be done in period II.</li>
+<li>In the beginning of the period II
+<ul>
+<li>Form a group. We prefer groups of 2-3, but the project can be done alone.</li>
+<li>Select a topic. You may ask in the course chat channel #project for opinion whether it's a good topic and a good dataset. You can change the topic later.</li>
+<li>Start planning.</li>
+</ul></li>
+<li>The main work for the project and the presentation will be done in the second half of the period II after all the workflow parts have been discussed in the course.</li>
+<li>The online presentations will be made on the evaluation week after period II.</li>
+</ul>
+</div>
+<div id="project-schedule" class="section level2">
+<div name="Project_schedule" data-unique="Project_schedule"></div><h2>Project schedule</h2>
+<ul>
+<li>Form a group and pick a topic. Register the group before November 9 23:59.</li>
+<li>Groups of 2-3 can reserve a presentation slot starting November 11.</li>
+<li>Groups of 1 can reserve a presentation slot starting November 11.</li>
+<li>Groups that register late can reserve a presentation slot starting 14th November.</li>
+<li>Work on the project. TA session queue is also for project questions.</li>
+<li>Project report deadline December 6.</li>
+<li>Project report peer grading December 7-9 (so that you'll get feedback for the report before the presentations).</li>
+<li>Project presentations December 14-18.</li>
+</ul>
+</div>
+<div id="groups" class="section level2">
+<div name="Groups" data-unique="Groups"></div><h2>Groups</h2>
+<p>Project work is done in groups of 1-3 persons. Preferred group size is 2-3, because you learn more when you talk about the project with someone else.</p>
+<p>If you don't have a group, you can ask other students in the group chat channel <strong>#project</strong>. Tell what kind of data you are interested in (e.g. medicine, health, biological, engineering, political, business), whether you prefer R or Python, and whether you have already more concrete idea for the topic.</p>
+<p>Groups of 2-3 students can choose their presentation time slot before 1 student groups. 3 person group is expected to do a bit more work than 2 person group.</p>
+<p>You can do the project alone, but the amount of work is expected to the same for 2 person groups.</p>
+</div>
+<div id="ta-sessions" class="section level2">
+<div name="TA_sessions" data-unique="TA_sessions"></div><h2>TA sessions</h2>
+<p>The groups will get help for the project work in <a href="https://avehtari.github.io/BDA_course_Aalto/assignments.html#TA_sessions">TA sessions</a>. When there are no weekly assignments, the TA sessions are still organized for helping in the project work.</p>
+</div>
+<div id="evaluation" class="section level2">
+<div name="Evaluation" data-unique="Evaluation"></div><h2>Evaluation</h2>
+<p>The project work's evaluation consists of</p>
+<ul>
+<li>peergraded project report,</li>
+<li>presentation and oral exam graded by the course staff.</li>
+</ul>
+</div>
+<div id="project-report" class="section level2">
+<div name="Project_report" data-unique="Project_report"></div><h2>Project report</h2>
+<p>In the project report you practice presenting the problem and data analysis results, which means that minimal listing of code and figures is not a good report. There are different levels for how data analysis project could be reported. This report should be more than a summary of results without workflow steps. While describing the steps and decisions made during the workflow, to keep the report readable some of the diagnostic outputs and code can be put in the appendix. If you are uncertain you can ask TAs in TA sessions whether you are on a good level of amount of details.</p>
+<p>The report should include</p>
+<ol style="list-style-type: decimal">
+<li>Introduction describing
+<ul>
+<li>the motivation</li>
+<li>the problem</li>
+<li>and the main modeling idea.</li>
+<li>Showing some illustrative figure is recommended.</li>
+</ul></li>
+<li>Description of the data and the analysis problem. Provide information where the data was obtained, and if it has been previously used in some online case study and how your analysis differs from the existing analyses.</li>
+<li>Description of at least two models, for example:
+<ul>
+<li>non hierarchical and hierarchical,</li>
+<li>linear and non linear,</li>
+<li>variable selection with many models.</li>
+</ul></li>
+<li>Informative or weakly informative priors, and justification of their choices.</li>
+<li>Stan code (brms can be used to generate the code, but Stan code needs to be present and explained).</li>
+<li>How to the Stan model was run, that is, what options were used. This is also more clear as combination of textual explanation and the actual code line.</li>
+<li>Convergence diagnostics (<span class="math inline"><span class="MathJax_Preview" style="color: inherit; display: none;"></span><span class="MathJax" id="MathJax-Element-1-Frame" tabindex="0" data-mathml="&lt;math xmlns=&quot;http://www.w3.org/1998/Math/MathML&quot;&gt;&lt;mrow class=&quot;MJX-TeXAtom-ORD&quot;&gt;&lt;mover&gt;&lt;mi&gt;R&lt;/mi&gt;&lt;mo&gt;&amp;#x005E;&lt;/mo&gt;&lt;/mover&gt;&lt;/mrow&gt;&lt;/math&gt;" role="presentation" style="position: relative;"><nobr aria-hidden="true"><span class="math" id="MathJax-Span-1" style="width: 0.828em; display: inline-block;"><span style="display: inline-block; position: relative; width: 0.769em; height: 0px; font-size: 106%;"><span style="position: absolute; clip: rect(1.005em, 1000.77em, 2.361em, -999.997em); top: -2.179em; left: 0em;"><span class="mrow" id="MathJax-Span-2"><span class="texatom" id="MathJax-Span-3"><span class="mrow" id="MathJax-Span-4"><span class="munderover" id="MathJax-Span-5"><span style="display: inline-block; position: relative; width: 0.769em; height: 0px;"><span style="position: absolute; clip: rect(3.128em, 1000.77em, 4.189em, -999.997em); top: -4.006em; left: 0em;"><span class="mi" id="MathJax-Span-6" style="font-family: MathJax_Math-italic;">R</span><span style="display: inline-block; width: 0px; height: 4.012em;"></span></span><span style="position: absolute; clip: rect(3.069em, 1000.59em, 3.659em, -999.997em); top: -4.301em; left: 0.18em;"><span class="mo" id="MathJax-Span-7" style=""><span style="font-family: MathJax_Size1;">ˆ</span></span><span style="display: inline-block; width: 0px; height: 4.012em;"></span></span></span></span></span></span></span><span style="display: inline-block; width: 0px; height: 2.185em;"></span></span></span><span style="display: inline-block; overflow: hidden; vertical-align: -0.059em; border-left: 0px solid; width: 0px; height: 1.253em;"></span></span></nobr><span class="MJX_Assistive_MathML" role="presentation"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow class="MJX-TeXAtom-ORD"><mover><mi>R</mi><mo>^</mo></mover></mrow></math></span></span><script type="math/tex" id="MathJax-Element-1">\widehat{R}</script></span>, ESS, divergences) and what was done if the convergence was not good with the first try.</li>
+<li>Posterior predictive checks and what was done to improve the model.</li>
+<li>Model comparison (e.g. with LOO-CV).</li>
+<li>Predictive performance assessment if applicable (e.g. classification accuracy) and evaluation of practical usefulness of the accuracy.</li>
+<li>Sensitivity analysis with respect to prior choices (i.e. checking whether the result changes a lot if prior is changed)</li>
+<li>Discussion of issues and potential improvements.</li>
+<li>Conclusion what was learned from the data analysis.</li>
+<li>Self-reflection of what the group learned while making the project.</li>
+</ol>
+</div>
+<div id="project-presentation" class="section level2">
+<div name="Project_presentation" data-unique="Project_presentation"></div><h2>Project presentation</h2>
+<p>In addition to the submitted report, each project must be presented by the authoring group, according to the following guidelines:</p>
+<ul>
+<li>The presentation should be high level but sufficiently detailed information should be readily available to help answering questions from the audience.</li>
+<li>The duration of the presentation should be 10 minutes (groups of 1-2 students) or 15 minutes (groups of 3 students).</li>
+<li>At the end of the presentation there will be an extra 5-10 minutes of questions by anyone in the audience or two members of the course staff who are presenr. The questions from lecturer/TAs can be considered as an oral exam questions, and if answers to these questions reveal weak knowledge of the methods and workflow steps which should be part of the project, that can reduce the grade.</li>
+<li>Grading will be done by the two members of the course staff using standardized grading instructions.</li>
+</ul>
+<p>Specific recommendations for the presentations include:</p>
+<ul>
+<li>The first slide should include project's title and group members' names.</li>
+<li>The chosen statistical model(s), including observation model and priors, must be explained and justified,</li>
+<li>Make sure the font is big enough to be easily readable by the audience. This includes figure captions, legends and axis information,</li>
+<li>The last slide should be a summary or take-home-messages and include contact information or link to a further information. (The grade will be reduced by one if the last slide has only something like "Thank you" or "Questions?"),</li>
+<li>In general, the best presentations are often given by teams that have frequently attended TA sessions and gotten feedback, so we strongly recommend attending these sessions.</li>
+</ul>
+</div>
+<div id="data-sets" class="section level2">
+<div name="Data_sets" data-unique="Data_sets"></div><h2>Data sets</h2>
+<p>As some data sets have been overused for these particular goals, note that the following ones are forbidden in this work (more can be added to this list so make sure to check it regularly):</p>
+<ul>
+<li>R data sets titanic and mtcars</li>
+<li>Baseball batting (used by Bob Carpenter's StanCon case study).</li>
+<li>Data sets used in the course demos</li>
+</ul>
+<p>It's best to use a dataset for which there is no ready made analysis in internet, but if you choose a dataset used already in some online case study, provide the link to previous studies and report how your analysis differs from those (for example if someone has made non-Bayesian analysis and you do the full Bayesian analysis).</p>
+<p>Depending on the model and the structure of the data, a good data set would have more than 100 observations but less than 1 million. If you know an interesting big data set, you can use a smaller subset of the data to keep the computation times feasible. It would be good that the data has some structure, so that it is sensible to use multilevel/hierarchical models.</p>
+</div>
+<div id="model-requirements" class="section level2">
+<div name="Model_requirements" data-unique="Model_requirements"></div><h2>Model requirements</h2>
+<ul>
+<li>Every parameter needs to have an explicit proper prior. Improper flat priors are not allowed.</li>
+<li>A hierarchical model is a model where the prior of certain parameter contain other parameters that are also estimated in the model. For instance, <code>b ~ normal(mu, sigma)</code>, <code>mu ~ normal(0, 1)</code>, <code>sigma ~ exponential(1)</code>.</li>
+<li>Do not impose hard constrains on a parameter unless they are natural to them. <code>uniform(a, b)</code> should not be used unless the boundaries are really logical boundaries and values beyond the boundaries are completely impossible.</li>
+<li>At least some models should include covariates. Modelling the outcome without predictors is likely too simple for the project.</li>
+<li><code>brms</code> can be used, but the Stan code must be included, briefly commented, and all priors need to be checked from the Stan code and adjusted to be weakly informative based on some justified explanation.</li>
+</ul>
+</div>
+<div id="some-examples" class="section level2">
+<div name="Some_examples" data-unique="Some_examples"></div><h2>Some examples</h2>
+<p>The following case study examples demonstrate how text, equations, figures, and code, and inference results can be included in one notebook. These examples don't necessarily have all the workflow steps required in your report, but different steps are illustrated in different case studies and you can get good ideas for your report just by browsing through them.</p>
+<ul>
+<li><a href="https://avehtari.github.io/BDA_course_Aalto/demos.html">BDA R and Python demos</a> are quite minimal in description of the data and discussion of the results, but show many diagnostics and basic plots.</li>
+<li>Some <a href="https://mc-stan.org/users/documentation/case-studies">Stan case studies</a> focus on some specific methods, but there are many case studies that are excellent examples for this course. They don't include all the steps required in this course, but are good examples of writing. Some of them are longer or use more advanced models than required in this course.
+<ul>
+<li><a href="https://mc-stan.org/users/documentation/case-studies/boarding_school_case_study.html">Bayesian workflow for disease transmission modeling in Stan</a></li>
+<li><a href="https://mc-stan.org/users/documentation/case-studies/model-based_causal_inference_for_RCT.html">Model-based Inference for Causal Effects in Completely Randomized Experments</a></li>
+<li><a href="https://mc-stan.org/users/documentation/case-studies/bball-hmm.html">Tagging Basketball Events with HMM in Stan</a></li>
+<li><a href="https://mc-stan.org/users/documentation/case-studies/golf.html">Model building and expansion for golf putting</a></li>
+<li><a href="https://mc-stan.org/users/documentation/case-studies/dyadic_irt_model.html">A Dyadic Item Response Theory Model</a></li>
+<li><a href="https://mc-stan.org/users/documentation/case-studies/lotka-volterra-predator-prey.html">Predator-Prey Population Dynamics: the Lotka-Volterra model in Stan</a></li>
+</ul></li>
+<li>Some <a href="https://github.com/stan-dev/stancon_talks">StanCon case studies</a> (scroll down) can also provide good project ideas.</li>
+</ul>
+</div>
+
+
+
+<div class="tocify-extend-page" data-unique="tocify-extend-page" style="height: 439.109px;"></div></div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open')
+  });
+});
+</script>
+
+<!-- code folding -->
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_');
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+
+
+<div style="position: absolute; width: 0px; height: 0px; overflow: hidden; padding: 0px; border: 0px; margin: 0px;"><div id="MathJax_Font_Test" style="position: absolute; visibility: hidden; top: 0px; left: 0px; width: auto; padding: 0px; border: 0px; margin: 0px; white-space: nowrap; text-align: left; text-indent: 0px; text-transform: none; line-height: normal; letter-spacing: normal; word-spacing: normal; font-size: 40px; font-weight: normal; font-style: normal; font-family: MathJax_Size1, sans-serif;"></div></div></body></html>

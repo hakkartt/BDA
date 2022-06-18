@@ -1,0 +1,121 @@
+---
+title: "BDA - Assignment 9"
+author: "Anonymous"
+output: 
+  pdf_document: 
+    toc: yes
+    toc_depth: 1
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Decision analysis for the factory data (3p)
+
+```{r}
+library(aaltobda)
+data("factory")
+library(rstan)
+set.seed(123)
+library(markmyassignment)
+assignment_path <- paste("https://github.com/avehtari/BDA_course_Aalto/",
+                         "blob/master/assignments/tests/assignment9.yml",
+                         sep="")
+set_assignment(assignment_path)
+```
+
+As noticed in the previous assignment, the hierarchical model fits best with the dataset, so use it to compute the utilities.
+
+## 1. For each of the six machines, compute and report the expected utility of one product of that machine.
+
+### Hierarchical model in stan
+
+```{stan, output.var="hierarchical_model"}
+data {
+  int < lower =0 > N; // number of measurements
+  int < lower =0 > J; // number of machines
+  vector[J] y[N];
+}
+parameters {
+  real mu; // hyper-parameter 1
+  real<lower=0> tau; // hyper-parameter 2
+  vector[J+1] theta; // separate mean parameter theta for each 7 machines
+  real<lower=0> sigma; // common sigma parameter for all7 machines
+}
+model {
+  // Weakly informative priors
+  mu ~ normal (0, 100); // hyperprior for mu
+  tau ~ inv_chi_square(0.1); // hyperprior for tau
+  for ( j in 1: (J+1) ){ // Adding the 7th machine
+    theta [j] ~ normal (mu, tau);
+  }
+  sigma ~ inv_chi_square(0.1);
+  // likelihood
+  for ( j in 1: J )
+    y[ ,j ] ~ normal (theta[j], sigma);
+}
+generated quantities {
+  vector[J+1] ypred ;
+  for (j in 1:(J+1)) // Adding the 7th machine
+    ypred[j] = normal_rng(theta[j], sigma);
+}
+
+```
+
+### Utility function
+
+```{r}
+utility <- function(draws){
+  util <- length(draws[draws >= 85])*(94) + length(draws[draws < 85]) * (-106)
+  return(util/length(draws))
+}
+
+mark_my_assignment()
+```
+
+### The expected utilities for one product of each machine
+
+```{r}
+factory_data <- list(y = factory, N = nrow(factory), J = ncol(factory))
+fit <- rstan::sampling(hierarchical_model, data = factory_data, refresh=0)
+monitor(fit)
+```
+
+```{r}
+
+df <- as.data.frame(fit)
+
+paste("The expeted utilities are...")
+paste("Machine 1:", utility(df$'ypred[1]'))
+paste("Machine 2:", utility(df$'ypred[2]'))
+paste("Machine 3:", utility(df$'ypred[3]'))
+paste("Machine 4:", utility(df$'ypred[4]'))
+paste("Machine 5:", utility(df$'ypred[5]'))
+paste("Machine 6:", utility(df$'ypred[6]'))
+
+```
+
+## 2. Rank the machines based on the expected utilities (from worst to best). Also briefly explain what the utility values tell about the quality of these machines. E.g. Tell which machines are profitable and which are not.
+
+### Ranking from worst to best
+
+1, 6, 3, 5, 2, 4
+
+### Discussion about utility values
+
+The expected utility value tells how much each finished product by the machine is expected to make. If the value is negative, the product produced by the machine is expected to be unprofitable for the company.
+
+Based on the calculated expected utilities with our hierarchical model, all the machines except the machine 1 are profitable for the factory and each finished product by these machines can be expected to have sufficient quality.
+
+Machine 1 on the other hand, is expected to produce insufficient quality products and isn't profitable for the company in the long run.
+
+## 3. Compute and report the expected utility of the products of a new (7th) machine.
+
+```{r}
+paste("The expeted utility for new (7th) machine is", utility(df$'ypred[7]'))
+```
+
+## 4. Based on your analysis, discuss briefly whether the company owner should buy a new (7th) machine.
+
+Based on the calculated ecpected utility for the new machine and knowing that the factory owner only cares about money (sad but i suppose this is kind of realistic), I would recommend him to invest into this new machine. Based on the analysis above the machine would make profit for the company in the long run.

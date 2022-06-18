@@ -1,0 +1,7 @@
+"0","s_squared <- sum( (windshieldy1 - y_bar)^2) / (n-1)"
+"0","x <- seq(10, 20, 0.01)"
+"0","degrees_of_freedom <- n - 1"
+"0","s <- sqrt((1+1/n))*sqrt(s_squared)"
+"0","density <- dtnew(mu, degrees_of_freedom, y_bar, s)"
+"0","plot_df <- data.frame(p1 = density, x_var = x)"
+"0","ggplot(plot_df, aes(x_var)) + geom_line(aes(y = p1)) + labs(x = ""y_tilde"") + labs(y = ""PDF"")"

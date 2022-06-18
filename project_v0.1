@@ -1,0 +1,180 @@
+---
+title: "Project_v0.1"
+author: "Anonymous"
+date: "November 25, 2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(rstan)
+rstan_options(auto_write = TRUE)
+set.seed(123)
+library(lubridate)
+```
+
+```{stan, output.var="hm"}
+//
+// This Stan program defines a SARIMAX model where hour is the main variable of the time series.
+// Seasonalities of 168 hours (weekly) are included. 
+// Additionally external variables holiday.
+
+data {
+  int<lower=0> N;
+  int<lower=0> fit;
+  int<lower=0> pred;
+  int<lower=0> count[N];
+  vector[N] lag1;
+  vector[N] lag2;
+  vector[N] lag24;
+  vector[N] holiday;
+  vector[N] monday;
+  vector[N] saturday;
+}
+
+parameters {
+  real alpha_raw;
+  real beta_1_raw;
+  real beta_2_raw;
+  real beta_24_raw;
+  real monday_shift_raw;
+  real saturday_shift_raw;
+  real holiday_shift_raw;
+}
+
+transformed parameters {
+  real alpha = 0.001 * alpha_raw;
+  real beta_1 = 0.001 * beta_1_raw;
+  real beta_2 = 0.001 * beta_2_raw;
+  real beta_24 = 0.001 * beta_24_raw;
+  real monday_shift = 0.001 * monday_shift_raw;
+  real saturday_shift = 0.001 * saturday_shift_raw;
+  real holiday_shift = 0.001 * holiday_shift_raw;
+}
+
+// The model to be estimated. We model the output
+// 'count' to be SARIMA distributed with AR(1), SAR(24) and SAR(168).
+model {
+  // weakly informative priors
+  alpha ~ normal(0, 10);
+  beta_1 ~ normal(0, 1);
+  beta_2 ~ normal(0, 1);
+  beta_24 ~ normal(0, 1);
+  holiday_shift ~ normal(0, 10);
+  monday_shift ~ normal(0, 10);
+  saturday_shift ~ normal(0, 10);
+  
+  
+  for (n in 169:fit)
+    count[n] ~ poisson_log(alpha + beta_1 * lag1[n] + beta_2 * lag2[n] +  beta_24 * lag24[n] + holiday_shift * holiday[n] + monday_shift * monday[n] + saturday_shift * saturday[n]);
+}
+
+generated quantities { 
+  vector[N-fit] cnt_pred;
+  
+  // Compute predictive distribution
+  for (j in 1:(pred))
+    cnt_pred[j] = poisson_log_rng(alpha + beta_1 * lag1[j+fit-1] + beta_2 * lag2[j+fit-2] + beta_24 * lag24[j+fit-24] + holiday_shift * holiday[j+fit] + monday_shift * monday[j+fit] + saturday_shift * saturday[j+fit]);
+    
+}
+
+```
+
+```{r}
+data <- read.csv("london_merged.csv") # read in data
+
+data$timestamp <- ymd_hms(data$timestamp)
+data$hour <- hour(as.character(data$timestamp))
+
+data$weekday = weekdays(as.Date(data$timestamp))
+data$is_saturday = as.numeric((weekdays(as.Date(data$timestamp)) == 'lauantai'))
+data$is_monday = as.numeric((weekdays(as.Date(data$timestamp)) == 'maanantai'))
+
+lags <- c(1, 2, 24)
+add.lags <- function(data, lags) {
+  is_valid <- rep(0, dim(data)[1])
+  # first add new columns
+  for (lag in lags) {
+    data[paste("lag", lag, sep="")] <- -1
+  }
+  for (i in 1:dim(data[1])) {
+    # check if we can find all lags necessary
+    ts <- data$timestamp[i]
+    lagged.timestamps <- as_datetime(sapply(lags,
+                                            FUN = function(x) ts - hours(x)))
+    if (all(lagged.timestamps %in% data$timestamp)) {
+      is_valid[i] <- 1
+      for (j in 1:length(lags)) {
+        data[i,paste("lag", lags[j], sep="")] <- 
+          log(data$cnt[which(data$timestamp == lagged.timestamps[j])] + 1e-6)
+      }
+    }
+  }
+  return (data[is_valid == 1,])
+}
+
+data.with.lags <- add.lags(data, lags)
+
+list.data <- function(data, columns, by.hour=FALSE) {
+  out_list <- list()
+  # check max length
+  end <- min(sapply(0:23, FUN = function(x) sum(data$hour == x)))
+  for (c in columns) {
+    mat <- sapply(0:23, FUN = function(x) data[(data$hour == x),c][1:end])
+    if (!by.hour) {
+      mat <- as.vector(t(mat)) # revert to original format
+    }
+    out_list[[c]] <- mat
+  }
+  return (out_list)
+}
+data.by.hour <- list.data(data.with.lags, names(data.with.lags), by.hour=TRUE)
+listed.data <- list.data(data.with.lags, names(data.with.lags), by.hour=FALSE)
+
+stan_data <- list(N=dim(data.with.lags)[1],
+                  fit = dim(data.with.lags)[1] - 15*24, 
+                  pred = 15*24,
+                  count=data.with.lags$cnt,
+                  lag1 = data.with.lags$lag1,
+                  lag2 = data.with.lags$lag2,
+                  lag24 = data.with.lags$lag24,
+                  holiday = data.with.lags$is_holiday,
+                  monday = data.with.lags$is_monday,
+                  saturday = data.with.lags$is_saturday)
+
+model <- rstan::sampling(hm, data=stan_data)
+
+```
+
+```{r}
+
+monitor(model)
+
+```
+
+```{r}
+N <- dim(data)[1]
+params <- paste("cnt_pred[", 1:360, "]", sep = "")
+
+preds <- as.data.frame(rstan::extract(model, pars = params))
+preds_point_est <- colMeans(preds)
+
+```
+
+```{r}
+N=dim(data)[1] 
+num_train = N - 15*24
+num_test <- 15*24
+
+mean((log(preds_point_est) - log(data$cnt[(num_train+1):N]))^2)
+```
+
+```{r}
+residuals <- preds_point_est - data$cnt[(num_train+1):N]
+acf(residuals)
+qqnorm(residuals)
+qqline(residuals)
+```

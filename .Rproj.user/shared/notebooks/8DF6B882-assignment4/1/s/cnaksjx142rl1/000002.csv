@@ -1,0 +1,5 @@
+"0","data(""bioassay_posterior"")"
+"0","alpha = bioassay_posterior$alpha"
+"0","beta = bioassay_posterior$beta"
+"0","# number of draws"
+"0","S = 4000"

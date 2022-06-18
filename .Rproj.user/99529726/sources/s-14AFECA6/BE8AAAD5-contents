@@ -1,0 +1,118 @@
+---
+title: "BDA - Assignment 5"
+author: "Anonymous"
+output: 
+  pdf_document: 
+    toc: yes
+    toc_depth: 1
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+# To install aaltobda, see the General information in the assignment.
+library(aaltobda)
+library(markmyassignment)
+library("ggplot2")
+assignment_path <- 
+  paste("https://github.com/avehtari/BDA_course_Aalto/", "blob/master/assignments/tests/assignment5.yml", sep="")
+set_assignment(assignment_path)
+show_tasks()
+```
+# Generalized linear model: Bioassay with Metropolis
+
+# 1.
+
+## a)
+Start by implementing a function called density_ratio to compute the density
+ratio function, r in Eq. (11.1) in BDA3.
+```{r}
+library(aaltobda)
+data("bioassay")
+
+mu_0 = c(0, 10)
+sigma_0 =  matrix(c(4, 10, 10, 100), 2, 2)
+
+density_ratio <- function(alpha_propose,
+                          alpha_previous,
+                          beta_propose,
+                          beta_previous,
+                          x,
+                          y,
+                          n){
+  
+  # Compute the log-density of a multivariate normal prior
+  log_prior_prop = dmvnorm(c(alpha_propose, beta_propose), mu_0, sigma_0, log = TRUE)
+  log_prior_prev = dmvnorm(c(alpha_previous, beta_previous), mu_0, sigma_0, log = TRUE)
+  log_likelihood_prop = bioassaylp(alpha_propose, beta_propose, x, y, n)
+  log_likelihood_prev = bioassaylp(alpha_previous, beta_previous, x, y, n)
+  
+  
+  # The unnormalized log posterior is simply the sum of log-likelihood and log-prior
+  log_posterior_prop = (log_prior_prop + log_likelihood_prop)
+  log_posterior_prev = (log_prior_prev + log_likelihood_prev)
+  
+  # Calculate the ratio as suggested in the BDA3 eq. 11.1
+  # NOTE: Remember that p1/p0 = exp(log(p1) − log(p0))!
+  exp(log_posterior_prop - log_posterior_prev)
+}
+
+# Testing that the density_ratio function works properly
+
+mark_my_assignment("density_ratio")
+
+```
+
+
+## b)
+
+Now implement a function called Metropolis_bioassay() which implements
+the Metropolis algorithm using the density_ratio().
+
+```{r}
+Metropolis_bioassay <- function(iterations, n_of_chains, scale){
+  
+  # 1. Draw starting point alpha0 and beta0 for which
+  #    p(alpha0, beta0|y) > 0 from starting distribution
+  stored = array(dim = c(n_of_chains, iterations, 2))
+  chain = array(dim = c(iterations + 1, 2))
+  chain[1,] = rmvnorm(1, mu_0, sigma_0)
+  
+  for (i in 1:n_of_chains) {
+    
+    # 2. For t = 1, 2, ...
+    for (t in 1:iterations){
+      
+      # a) Sample a proposal alpha* and beta* from a jumping distribution at
+      #    time t. Jumping distribution must be symmetric.
+      alpha_prop = rnorm(1, chain[t, 1], (scale*2)^2)
+      beta_prop = rnorm(1, chain[t, 2], (scale*10)^2)
+      # b) Calculate the ratio of densities.
+      r = density_ratio(alpha_prop, chain[t, 1], beta_prop, chain[t, 2],
+                        bioassay$x, bioassay$y, bioassay$n)
+      # c) ->
+      if(runif(1) < r){
+        chain[t+1, ] = c(alpha_prop, beta_prop)
+      } else {
+        chain[t+1, ] = chain[t, ]
+      }
+      
+    }
+    
+    # Discard the warmup period from each chain, which by default is the first 
+    # half of the chain
+    chain = chain[(iterations/2 + 1):iterations,]
+    # Store the iterated chain
+    stored[i,,] = chain
+    # Initialize everything
+    chain = array(dim = c(iterations + 1, 2))
+    chain[1,] = rmvnorm(1, mu_0, sigma_0)
+  }
+  
+  stored
+  
+}
+```
+

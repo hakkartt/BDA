@@ -1,0 +1,136 @@
+---
+title: "BDA - Assignment 2"
+author: "Anonymous"
+output: 
+  pdf_document: 
+    toc: yes
+    toc_depth: 1
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+# To install aaltobda, see the General information in the assignment.
+library(aaltobda)
+library(markmyassignment)
+assignment_path <-paste("https://github.com/avehtari/BDA_course_Aalto/", "blob/master/assignments/tests/assignment2.yml", sep="")
+set_assignment(assignment_path)
+```
+```{r}
+data("algae")
+algae
+```
+Algae status is monitored in 274 sites at Finnish lakes and rivers. The observations for the 2008 algae status at each site are presented in file algae.txt (’0’: no algae, ’1’: algae present).
+
+pi: the probability of a monitoring site having detectable blue-green algae levels
+y: the observations in algae
+
+Use a binomial model for the observations y and a Beta(2, 10) prior for binomial model parameter pi to formulate a Bayesian model. Here it is not necessary to derive the posterior distribution for pi as it has already been done in the book and it suffices to refer to that derivation.
+
+Your task is to make Bayesian inference for binomial model and answer questions based on it.
+
+## a)
+
+### 1)
+Likelihood p(y|pi) = Bin(y|n, pi) = Bin(44|274, pi)
+
+### 2)
+Prior p(pi) = Beta(alpha, beta), Beta(2, 10)
+
+### 3)
+Posterior p(pi|y) = Beta(pi|alpha + y, beta + n - y), Beta(46, 240)
+
+## b)
+E(pi|y) and posterior interval
+```{r}
+beta_point_est <- function(prior_alpha, prior_beta, data){
+  y <- sum(data)
+  n <- length(data)
+  posterior_alpha <- prior_alpha + y
+  posterior_beta <- prior_beta + n - y
+  E = posterior_alpha / (posterior_alpha + posterior_beta)
+  E
+}
+
+beta_interval <- function(prior_alpha, prior_beta, data, prob){
+  y <- sum(data)
+  n <- length(data)
+  posterior_alpha <- prior_alpha + y
+  posterior_beta <- prior_beta + n - y
+  
+  a <- posterior_alpha
+  b <- posterior_beta
+  
+  c(qbeta((1-prob) - (1-prob)/2, a, b), qbeta(prob + (1-prob)/2, a, b))
+}
+```
+## c)
+```{r}
+beta_low <- function(prior_alpha, prior_beta, data, pi_0){
+  y <- sum(data)
+  n <- length(data)
+  posterior_alpha <- prior_alpha + y
+  posterior_beta <- prior_beta + n - y
+  a <- posterior_alpha
+  b <- posterior_beta
+  
+  pbeta(pi_0, a, b)
+}
+```
+
+Checking that everything is correct...
+```{r}
+mark_my_assignment()
+```
+
+## d)
+Assumptions are required in order to use this kind of a model with this type of data:
+
+### 1)
+Data is i.i.d
+
+### 2)
+
+Conjugacy -> The property that the posterior distribution follows the same parametric form as the prior distribution (in this case beta distribution)
+
+### 3)
+
+Informative prior -> Assumption, that we know something about the phenomenon from before
+
+## e)
+prior1: (alpha, beta) = 1
+prior2: (alpha, beta) < 10
+prior3: 10 < (alpha, beta) < 100
+priot4: (alpha, beta) > 100
+
+
+```{r}
+n = length(algae)
+y = sum(algae)
+
+# Posterior of prior1:
+alpha <- 1
+beta <- 1
+curve(dbeta(x, alpha + y, beta + n - y), from = 0, to = 1, col = 'green')
+
+
+# Posterior of prior2:
+alpha <- 7
+beta <- 9
+curve(dbeta(x, alpha + y, beta + n - y), from = 0, to = 1, col = 'purple', add = TRUE)
+
+# Posterior of prior3:
+alpha <- 88
+beta <- 66
+curve(dbeta(x, alpha + y, beta + n - y), from = 0, to = 1, col = 'orange', add = TRUE)
+
+
+# Posterior of prior4:
+alpha <- 222
+beta <- 111
+curve(dbeta(x, alpha + y, beta + n - y), from = 0, to = 1, col = 'black', add = TRUE)
+
+legend(0.75, 15, legend=c("posterior1", "posterior2","posterior3", "posterior4"), col=c("green","purple","orange", "black"), lty=c(1,1,1,1))
+```
+From the plotted graph we can see that as alpha and beta grow larger, the expected value of the distribution grows / moves towards 1.

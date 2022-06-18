@@ -1,0 +1,2 @@
+"0","sample<-rbeta(1000,alpha,beta)"
+"0","hist(sample)"

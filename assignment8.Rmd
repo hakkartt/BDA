@@ -1,0 +1,297 @@
+---
+title: "BDA - Assignment 8"
+author: "Anonymous"
+output: 
+  pdf_document: 
+    toc: yes
+    toc_depth: 1
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Model assessment: LOO-CV for factory data with Stan (6p)
+
+In this exercise we are using LOO-CV to assess the predictive performance of the pooled, separate and hierarchical models which were implemented last week in assignment 7.
+
+Read data.
+
+```{r}
+library(aaltobda)
+library("ggplot2")
+library(rstan)
+data("factory")
+rstan_options(auto_write = TRUE)
+set.seed(123)
+```
+
+## 1. Fit the models with Stan as instructed in Assignment 7.
+
+Here, it is enough to copy to models from assignment 7. I'll also add how I ended up choosing the weakly informative priors for the models.
+
+### Weakly informative priors
+
+In the Stan github page (https://github.com/stan-dev/stan/wiki/Prior-Choice-Recommendations) it says that a good general weakly informative prior is normal distribution with mean equal to data mean and standard deviation equal to deviation between the column means:
+
+```{r}
+mu_prior_mu <- mean(colMeans(factory))
+mu_prior_sigma <- sd(colMeans(factory))
+
+round(mu_prior_mu, 1)
+round(mu_prior_sigma, 1)
+```
+
+On the other hand, on the course book BDA3, on page 55 it says:
+
+"We characterize a prior distribution as weakly informative if it is proper but is set up so that the information it does provide is intentionally weaker than whatever actual prior knowledge is available."
+
+It is also written on the same page that:
+
+"Rather than trying to model complete ignorance, we prefer in most problems to use weakly informative prior distributions that include a small amount of real-world information, enough to ensure that the posterior distribution makes sense."
+
+Based on this, we could choose a weakly informative prior to be e.g. $\mu_j \sim N(100, 50)$. Here the data mean is close to the actual value, but the second parameter is set, on purpose, higher than we know based on data it is. This way we have enough information to make sure that our inferences are contrained to be reasonable. We started from strongly informative data prior and broadened it to account for uncertainty in our prior beliefs and in the applicability of any historically based prior on new data. (BDA3, p. 55-56)
+
+With this prior the resulting posterior will most likely make sense, but the prior isn't too informative.
+
+Weakly informative prior for $\sigma_j$ parameter needs to be decided bit differently. On BDA3 p. 130 it says that for variance parameters we should consider the t family of distributions (actually, the half-t, since the scale parameter $\tau$ is constrained to be positive) as an alternative class that includes normal and Cauchy as edge cases. For our purposes, it is enough to recognize that the half-Cauchy can be a convenient weakly informative family; the distribution has a broad peak at zero and a single scale parameter, which we shall label A to indicate that it could be set to some large value. It also says in the book that we shall consider half-Cauchy
+models for variance parameters which are estimated from a small number of groups (so thatinferences are sensitive to the choice of weakly informative prior distribution). In our case the data has only 5 groups so based on this half-Cauchy could be reasonable choice.
+
+Later on pages 131 and 132 of the BDA3 it is also shown via example, that by choosing scale parameter value of the half-Cauchy distribution correctly, a good posterior is achieved and the whole model will perform well. The scale parameter value should be chosen to be a bit higher than we expect for the standard deviation of the underlying data, so that the model will be constrained only weakly. Based on this we choose our weakly informative prior for $\sigma_j$ to be half-Cauchy with scale parameter 40 because we expect our data to deviate approximately 25 from data mean and we on purpose choose higher value than that.
+
+### Models
+
+#### Separate model
+
+In the separate model, each machine has its own model.
+
+$$ y_{ij} \sim N(\mu_j, \sigma_j)  $$
+$$ \mu_j \sim N(100, 50) $$
+$$  \sigma_j \sim Cauchy(0, 40) > 0 $$
+
+```{stan, output.var="separate_model"}
+data {
+  int < lower =0 > N; // n of measurements
+  int < lower =0 > J; // n of machine
+  vector[J] y[N];
+}
+parameters {
+  vector<lower = 0>[J] mu ;
+  vector<lower = 0>[J] sigma ;
+}
+model {
+  // weakly informative priors
+  for ( j in 1: J ){
+    mu [j] ~ normal (100, 50);
+    sigma [j] ~ cauchy(0, 40);
+  }
+  // likelihood
+  for ( j in 1: J )
+    y[ ,j ] ~ normal (mu[j], sigma[j]);
+}
+generated quantities {
+  vector[J] ypred ;
+  matrix[N, J] log_lik ;
+  for (j in 1:J) 
+    ypred[j] = normal_rng (mu[j], sigma[j]); // Compute predictive distribution for J machines
+  for (i in 1:N)
+    for (j in 1:J)
+      log_lik[i, j] = normal_lpdf(y[i,j] | mu[j], sigma[j]); // Compute the log-likelihood values of each observation for every posterior draw
+}
+
+```
+
+```{r}
+stan_data <- list(y = factory, N = nrow(factory), J = ncol(factory))
+sm <- rstan::sampling(separate_model, data = stan_data)
+monitor(sm)
+```
+
+#### Pooled model
+
+In the pooled model, all the measurements are combined and no distinction is made between the machines (they are drawn from the same distribution and the paramters do not change between the machines). We are using the same weakly informative priors as earlier in the separate model as there is no need to change them.
+
+$$ y_{ij} \sim N(\mu, \sigma)  $$
+$$ \mu \sim N(100, 50) $$
+$$  \sigma \sim Cauchy(0, 40) > 0 $$
+
+```{stan, output.var="pooled_model"}
+data {
+  int < lower =0 > N; // n of measurements
+  int < lower =0 > J; // n of machines
+  vector[J] y[N];
+}
+parameters {
+  real<lower = 0> mu ;
+  real<lower = 0> sigma ;
+}
+model {
+  // weakly informative priors
+  mu ~ normal (100, 50);
+  sigma ~ cauchy(0, 40);
+  // likelihood
+  for ( j in 1: J )
+    y[ ,j ] ~ normal (mu, sigma);
+}
+generated quantities {
+  real ypred ;
+  matrix[N, J] log_lik ;
+  ypred = normal_rng(mu, sigma); // Compute predictive distribution for a machine as we cannot tell the difference between the machines in the pooled model.
+  for (i in 1:N)
+    for (j in 1:J)
+      log_lik[i, j] = normal_lpdf(y[i, j] | mu, sigma); // Compute the log-likelihood values of each observation for every posterior draw
+}
+
+```
+
+```{r}
+stan_data <- list(y = factory,N = nrow(factory),J = ncol(factory))
+pm <- rstan::sampling(pooled_model, data = stan_data)
+monitor(pm)
+```
+
+#### Hierarchical model
+
+In hierarchical model, as in the model described in the book, use the same measurement standard deviation $\sigma$ for all the groups in the hierarchical model. Again, there is no need to change our priors for this case. Only thing changing is that we need to use the hyper-priors now in addition to priors.
+
+$$ y_j \sim N(\theta_{ij}, \sigma)  $$
+$$ \theta_j \sim N(\mu, \tau) $$
+$$ \sigma \sim Cauchy(0, 40) > 0 $$
+$$ \mu \sim N(100, 50) $$
+$$ \tau \sim Cauchy(0, 40) > 0 $$
+
+```{stan, output.var="hierarchical_model"}
+data {
+  int < lower =0 > N; // n of measurements
+  int < lower =0 > J; // n of machines
+  vector[J] y[N];
+}
+parameters {
+  real mu; // hyper-parameter 1
+  real<lower=0> tau; // hyper-parameter 2
+  vector[J] theta; // separate mean parameter theta for each machine
+  real<lower=0> sigma; // common sigma parameter for all machines
+}
+model {
+  // weakly informative priors
+  mu ~ normal (100, 50); // hyperprior for mu
+  tau ~ cauchy(0, 40); // hyperprior for tau
+  for ( j in 1: J ){
+    theta [j] ~ normal (mu, tau);
+  }
+  sigma ~ cauchy(0,40);
+  // likelihood
+  for ( j in 1: J )
+    y[ ,j ] ~ normal (theta[j], sigma);
+}
+generated quantities {
+  vector[J] ypred ;
+  real theta7;
+  matrix[N, J] log_lik ;
+  
+  for (j in 1:J)
+    ypred[j] = normal_rng(theta[j], sigma);
+  theta7 = normal_rng(mu, tau);
+  for (i in 1:N)
+    for (j in 1:J)
+      log_lik[i, j] = normal_lpdf(y[i, j] | theta[j], sigma); // Compute the log-likelihood values of each observation for every posterior draw
+}
+
+```
+
+```{r}
+stan_data <- list(y = factory,N = nrow(factory),J = ncol(factory))
+hm <- rstan::sampling(hierarchical_model, data = stan_data)
+monitor(hm)
+```
+
+## 2. Compute the PSIS-LOO elpd values and the $\hat{k}$-values for each of the three models.
+
+### Separate model
+
+```{r}
+# Convert extracted log_likelihood values to matrix, since loo-function requires matrix as its parameter
+sm_ll <- matrix(unlist(extract(sm, pars = paste("log_lik[",rep(1:5, 6),",", rep(1:6, each=5),"]", sep=""))), ncol = 30)
+loo_sm <- loo(sm_ll)
+loo_sm
+plot(loo_sm)
+```
+
+### Pooled model
+
+```{r}
+# Convert extracted log_likelihood values to matrix, since loo-function requires matrix as its parameter
+pm_ll <- matrix(unlist(extract(pm, pars = paste("log_lik[",rep(1:5, 6),",", rep(1:6, each=5),"]", sep=""))), ncol = 30)
+loo_pm <- loo(pm_ll)
+loo_pm
+plot(loo_pm)
+```
+
+### Hierarchical model
+
+```{r}
+# Convert extracted log_likelihood values to matrix, since loo-function requires matrix as its parameter
+hm_ll <- matrix(unlist(extract(hm, pars = paste("log_lik[",rep(1:5, 6),",", rep(1:6, each=5),"]", sep=""))), ncol = 30)
+loo_hm <- loo(hm_ll)
+loo_hm
+plot(loo_hm)
+```
+
+## 3. Compute the effective number of parameters $p_{eff}$ for each of the three models.
+
+The estimated effective number of parameters for each model can be solved analytically using the equations 7.15 and 7.5 in the BDA3. In this case, we can actually get the values in a simpler method, since the function used in the previous part 2 computed the $p_{eff}$ estimates.
+
+### Separate model
+
+```{r}
+### SEPARATE MODEL ###
+
+# p_eff estimate
+loo_sm$estimates[2,1]
+
+# p_eff standard errors
+loo_sm$estimates[2,2]
+```
+
+The achieved values are feasible, since the model has in total 12 parameters.
+
+### Pooled model
+
+```{r}
+### POOLED MODEL ###
+
+# p_eff estimate
+loo_pm$estimates[2,1]
+
+# p_eff standard errors
+loo_pm$estimates[2,2]
+```
+
+These values seem also feasible, since our pooled model had only 2 parameters in total.
+
+### Hierarchical model
+
+```{r}
+### HIERARCHICAL MODEL ###
+
+# p_eff estimate
+loo_hm$estimates[2,1]
+
+# p_eff standard errors
+loo_hm$estimates[2,2]
+```
+
+Also, the estimate for effective number of parameters for hierarchical model seems reasonable, since the original model had in total 7 parameters.
+
+## 4. Assess how reliable the PSIS-LOO estimates are for the three models based on the $\hat{k}$-values.
+
+The estimates for the hierarchical model and the pooled model were good and all of the $\hat{k}$-values were less or equal than 0.7. Based on this, we can state that the the PSIS-LOO estimates can be considered to be reliable for these two models.
+
+The separate model on the otherhand, had the worst performance when it came to $\hat{k}$-values. Several estimates were greater than 0.7, so there is a concern that the PSIS-LOO estimate for the separate model may be too optimistic. This can lead us to overestimate the predictive accuracy of the model.
+
+## 5. An assessment of whether there are differences between the models with regard to the $elpd_{loo-cv}$, and if so, which model should be selected according to PSIS-LOO.
+
+The best PSIS-LOO estimate was achieved with hierarchical model. All models had pretty similar performances with estimates ranging from -126.7 to -130.9. Based on the reasoning in the previous part, where the $\hat{k}$-values were compared, we would select our model between pooled and hierachical model. From these two models I would select the hierarchical version, because of the following two reasons:
+
+1. Hierarchical model has the greatest PSIS-LOO estimate with value -126.7.
+2. The pooled model has a strong assumption that all the measurements for all the machines follow the same distribution. With hierarchical model, less assumptions are required, which is in general a good feature in statistics. 

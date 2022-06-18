@@ -1,0 +1,4 @@
+"0","data(""bioassay"")"
+"0","log_importance_weights <- function(alpha, beta, x, y, n){"
+"0","  bioassaylp(alpha, beta, bioassay$x, bioassay$y, bioassay$n)"
+"0","}"

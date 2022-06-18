@@ -1,0 +1,136 @@
+---
+title: "BDA - Assignment 6"
+author: "Anonymous"
+output: 
+  pdf_document: 
+    toc: yes
+    toc_depth: 1
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+# To install aaltobda, see the General information in the assignment.
+library(aaltobda)
+library("ggplot2")
+library(rstan)
+```
+
+# Generalized linear model: Bioassay with Stan
+
+Replicate the computations for the bioassay example of section 3.7 (BDA3) using Stan.
+
+## 1.
+
+The data for the assignment.
+
+```{r}
+data("bioassay")
+
+bioassay_data <- list(N = dim(bioassay)[1], x = bioassay$x,
+n = bioassay$n, y = bioassay$y)
+
+```
+
+Write down the model for the bioassay data in Stan syntax.
+
+```{stan, output.var="bioassay_model"}
+
+### THE MODEL FOR BIOASSAY DATA USING STAN ###
+
+# Declare the data required to fit the model here
+data {
+  int<lower=1> N; // number of data points
+  int<lower=0> n[N]; // number of animals
+  int<lower=0, upper=n[N]> y[N]; // number of deaths
+  real x[N]; // dose (log g/ml)
+}
+
+# May be used to define new variables that can be computed based on the data.
+# Or in other words, preprocess the data.
+transformed data {
+  vector[2] mu = [ 0, 10 ]';
+  cov_matrix[2] Sigma = [ [4, 10] , [10, 100] ];
+}
+
+# Define the model parameters here, defines the sampling space
+parameters {
+  vector[2] theta; # two-element vector so that the first value denotes alpha and latter one beta
+}
+
+# The transformed parameters block allows users to define transforms
+# of parameters within a mode.
+# Allows for parameter processing before posterior is computed.
+
+# Define the log probability function on the constrained parameter space here.
+# The posterior.
+model {
+  # priors
+  theta ~ multi_normal(mu, Sigma);
+  
+  # observation model / likelihood
+  y[N] ~ binomial_logit(n[N], theta[1] + theta[2]*x[N]);
+  
+}
+
+
+```
+
+Fit the model.
+
+```{r}
+bioassay_fit <- sampling(bioassay_model, bioassay_data, seed = 14102020)
+```
+
+The initial points are set by Stan in a following manner: If there are user-supplied initial values for parameters, these are read using the same input mechanism and same file format as data reads. Any constraints declared on the parameters are validated for the initial values. If a variable’s value violates its declared constraint, the program halts and a diagnostic message is printed. After being read, initial values are transformed to unconstrained values that will be used to initialize the sampler. (https://mc-stan.org/docs/2_19/reference-manual/initialization.html)
+
+The default chain length / number of iterations that Stan uses is 2000. The default warmup length is half of that (1000). The default number of chains in Stan is 4. These default values are used in the model.
+
+Plotting the chains to see if the model works. (Please note that "theta[1]"=$\alpha$ and "theta[2]"=$\beta$.)
+
+```{r}
+# Convergence plot for alpha
+traceplot(bioassay_fit, pars = "theta[1]", inc_warmup = FALSE)
+
+# Convergence plot for beta
+traceplot(bioassay_fit, pars = "theta[2]", inc_warmup = FALSE)
+```
+
+Model seems to be working nicely. Proceeding to analyze the convergence numerically.
+
+## 2.
+
+The basic idea of $\hat{R}$ is to serve as a convergence diagnostic that compares the between- and within-chain estimates for model parameters. With this estimand one can monitor convergence of the iterative simulation. If this potential scale reduction estimand gets high values, conducting further simulations can improve our inference about the target distribution.
+
+Calling monitor(bioassay_fit) to obtain $\hat{R}$ for $\alpha$ and $\beta$.
+
+```{r}
+monitor(bioassay_fit)
+```
+
+As it says in R console output, at convergence $\hat{R}$ values for $\alpha$ and $\beta$ should be smaller or equal than 1.05. In the data frame obtained from calling monitor(bioassay_fit), theta[1] equals to $\alpha$ and theta[2] to $\beta$. $\hat{R}$ values for both of these equal to 1.
+
+$$\hat{R}_{alpha} = 1, \hat{R}_{beta} = 1$$
+
+This means that the chains have converged well and we do not need to proceed simulating further.
+
+## 3.
+
+Plotting the draws for $\alpha$ and $\beta$ (scatter plot)and comparing to Figure 3.3b in BDA3.
+
+
+```{r}
+stan_scat(bioassay_fit, pars = c("theta[1]", "theta[2]"))
+```
+
+The plot looks fairly similar to Figure 3.3b in BDA3.
+
+## 4.
+
+- Operating system: Linux.
+- Programming environment: R.
+- Interface used: RStan.
+
+I didn't encounter any installation or compilation problems and didn't change to jupyter.cs.aalto.fi, as I did not encounter any problems when installing locally.

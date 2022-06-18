@@ -1,0 +1,20 @@
+"0","# To install aaltobda, see the General information in the assignment."
+"0","library(aaltobda)"
+"0","library(markmyassignment)"
+"0","library(""ggplot2"")"
+"2","Learn more about the underlying theory at https://ggplot2-book.org/
+"
+"0","assignment_path <- "
+"0","  paste(""https://github.com/avehtari/BDA_course_Aalto/"", ""blob/master/assignments/tests/assignment3.yml"", sep="""")"
+"0","set_assignment(assignment_path)"
+"2","Assignment set:
+assignment3: Bayesian Data Analysis: Assignment 3
+The assignment contain the following (6) tasks:
+- mu_point_est
+- mu_interval
+- mu_pred_interval
+- mu_pred_point_est
+- posterior_odds_ratio_point_est
+- posterior_odds_ratio_interval
+
+"

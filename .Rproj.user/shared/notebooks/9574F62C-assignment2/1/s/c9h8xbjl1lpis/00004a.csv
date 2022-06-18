@@ -1,0 +1,6 @@
+"0","n = length(algae)"
+"0","y = sum(algae)"
+"0","# Posterior of prior1:"
+"0","alpha <- 1"
+"0","beta <- 1"
+"0","curve(dbeta(x, alpha + y, beta + n - y), from = 0, to = 1, col = 'green')"

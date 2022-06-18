@@ -1,0 +1,196 @@
+---
+title: "Project"
+author: "Anonymous"
+date: "November 25, 2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(rstan)
+rstan_options(auto_write = TRUE)
+set.seed(123)
+library(lubridate)
+```
+
+```{stan, output.var="hm"}
+//
+// This Stan program defines a SARIMAX model where hour is the main variable of the time series.
+// Seasonalities of 168 hours (weekly) are included. 
+// Additionally external variables holiday.
+
+data {
+  int<lower=0> N;
+  int<lower=0> fit;
+  int<lower=0> pred;
+  int<lower=0> count[N];
+  vector[N] holiday;
+  vector[N] weekend;
+}
+
+transformed data {
+real log_count[N];
+  for (i in 1:N) 
+   log_count[i] = log(count[i] + 0.0000001);
+}
+
+parameters {
+  real alpha_raw;
+  real beta_1_raw;
+  real beta_2_raw;
+  real beta_24_raw;
+  real holiday_shift_raw;
+  real weekend_shift_raw;
+}
+
+transformed parameters {
+  real alpha = 0.1*alpha_raw;
+  real beta_1 = 0.1*beta_1_raw;
+  real beta_2 = 0.1*beta_2_raw;
+  real beta_24 = 0.1*beta_24_raw;
+  real holiday_shift = 0.1*holiday_shift_raw;
+  real weekend_shift = 0.1*weekend_shift_raw;
+}
+
+// The model to be estimated. We model the output
+// 'count' to be SARIMA distributed with AR(1), SAR(24) and SAR(168).
+model {
+  // weakly informative priors
+  alpha ~ normal(0, 10);
+  beta_1 ~ normal(0, 1);
+  beta_2 ~ normal(0, 1);
+  beta_24 ~ normal(0, 1);
+  holiday_shift ~ normal(0, 10);
+  weekend_shift ~ normal(0, 10);
+  
+  for (n in 25:fit)
+    count[n] ~ poisson_log(alpha + beta_1 * log_count[n-1] + beta_2 * log_count[n-2] + beta_24 * log_count[n-24] + holiday_shift * holiday[n] + weekend_shift * weekend[n]);
+}
+
+generated quantities { 
+  vector[N-fit] cnt_pred;
+  // Compute predictive distribution
+  for (i in 1:(pred))
+    if (i == 1)
+      cnt_pred[i] = poisson_log_rng(alpha + beta_1*log_count[i+fit-1] + beta_2*log_count[i+fit-2] + beta_24*log_count[i+fit-24] + holiday_shift*holiday[i+fit] + weekend_shift*weekend[i+fit]);
+    else if (i == 2)
+      cnt_pred[i] = poisson_log_rng(alpha + beta_1*log(cnt_pred[i-1]+0.00000001) + beta_2*log_count[i+fit-2] + beta_24*log_count[i+fit-24] + holiday_shift*holiday[i+fit] + weekend_shift*weekend[i+fit]);
+    else if (3 <= i <= 24)
+      cnt_pred[i] = poisson_log_rng(alpha + beta_1*log(cnt_pred[i-1]+0.00000001) + beta_2*log(cnt_pred[i-2]+0.00000001) + beta_24*log_count[i+fit-24] + holiday_shift*holiday[i+fit] + weekend_shift*weekend[i+fit]);
+    else if (i > 24)
+      cnt_pred[i] = poisson_log_rng(alpha + beta_1*log(cnt_pred[i-1]+0.00000001) + beta_2*log(cnt_pred[i-2]+0.00000001) + beta_24*log(cnt_pred[i-24]+0.00000001) + holiday_shift*holiday[i+fit] + weekend_shift*weekend[i+fit]);
+}
+
+```
+
+```{r}
+x <- 7*24
+
+data <- read.csv("london_merged.csv") # read in data
+
+data1 <- data[10972:11979,]
+data2 <- data[14489:15496,]
+data3 <- data[16167:17174,]
+
+stan_data1 <- list(N=dim(data1)[1],
+                  fit = dim(data1)[1] - x, 
+                  pred = x,
+                  count=data1$cnt,
+                  holiday = data1$is_holiday,
+                  weekend = data1$is_weekend)
+
+stan_data2 <- list(N=dim(data2)[1],
+                  fit = dim(data2)[1] - x, 
+                  pred = x,
+                  count=data2$cnt,
+                  holiday = data2$is_holiday,
+                  weekend = data2$is_weekend)
+
+stan_data3 <- list(N=dim(data3)[1],
+                  fit = dim(data3)[1] - x, 
+                  pred = x,
+                  count=data3$cnt,
+                  holiday = data3$is_holiday,
+                  weekend = data3$is_weekend)
+
+model1 <- rstan::sampling(hm, data=stan_data1)
+model2 <- rstan::sampling(hm, data=stan_data2)
+model3 <- rstan::sampling(hm, data=stan_data3)
+
+```
+
+```{r}
+monitor(model1)
+```
+```{r}
+monitor(model2)
+```
+```{r}
+monitor(model3)
+```
+
+
+```{r}
+params <- paste("cnt_pred[", 1:168, "]", sep = "")
+preds <- as.data.frame(rstan::extract(model1, pars = params))
+preds_point_est <- colMeans(preds)
+
+N=dim(data1)[1] 
+num_train <- N - x
+num_test <- x
+
+# RMSLE
+rmsle1 <- sqrt(mean((log(preds_point_est) - log(data1$cnt[(num_train+1):N]))^2))
+
+# Plots
+residuals <- preds_point_est - data1$cnt[(num_train+1):N]
+acf(residuals)
+qqnorm(residuals)
+qqline(residuals)
+```
+
+```{r}
+params <- paste("cnt_pred[", 1:168, "]", sep = "")
+preds <- as.data.frame(rstan::extract(model2, pars = params))
+preds_point_est <- colMeans(preds)
+
+N=dim(data2)[1] 
+num_train <- N - x
+num_test <- x
+
+# RMSLE
+rmsle2 <- sqrt(mean((log(preds_point_est) - log(data2$cnt[(num_train+1):N]))^2))
+
+# Plots
+residuals <- preds_point_est - data2$cnt[(num_train+1):N]
+acf(residuals)
+qqnorm(residuals)
+qqline(residuals)
+```
+
+```{r}
+params <- paste("cnt_pred[", 1:168, "]", sep = "")
+preds <- as.data.frame(rstan::extract(model3, pars = params))
+preds_point_est <- colMeans(preds)
+
+N=dim(data3)[1] 
+num_train <- N - x
+num_test <- x
+
+# RMSLE
+rmsle3 <- sqrt(mean((log(preds_point_est) - log(data3$cnt[(num_train+1):N]))^2))
+
+# Plots
+residuals <- preds_point_est - data3$cnt[(num_train+1):N]
+acf(residuals)
+qqnorm(residuals)
+qqline(residuals)
+```
+
+```{r}
+mean(c(rmsle1, rmsle2, rmsle3))
+```
+

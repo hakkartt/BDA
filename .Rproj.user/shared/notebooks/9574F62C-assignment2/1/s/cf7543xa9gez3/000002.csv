@@ -1,0 +1,13 @@
+"0","# To install aaltobda, see the General information in the assignment."
+"0","library(aaltobda)"
+"0","library(markmyassignment)"
+"0","assignment_path <-paste(""https://github.com/avehtari/BDA_course_Aalto/"", ""blob/master/assignments/tests/assignment2.yml"", sep="""")"
+"0","set_assignment(assignment_path)"
+"2","Assignment set:
+assignment2: Bayesian Data Analysis: Assignment 2
+The assignment contain the following (3) tasks:
+- beta_point_est
+- beta_interval
+- beta_low
+
+"
